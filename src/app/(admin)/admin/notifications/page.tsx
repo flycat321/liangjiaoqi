@@ -2,14 +2,22 @@
 
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Send, User, Loader2 } from 'lucide-react'
+import { Send, User, Loader2, Bell } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
-import { createClient } from '@/lib/supabase/client'
+import { formatRelative } from '@/lib/utils/format'
 
 interface ClientOption {
   id: string
   name: string
+}
+
+interface SentNotification {
+  id: string
+  title: string
+  body: string | null
+  created_at: string
+  client_name: string
 }
 
 export default function AdminNotificationsPage() {
@@ -17,37 +25,54 @@ export default function AdminNotificationsPage() {
   const [loading, setLoading] = useState(false)
   const [clients, setClients] = useState<ClientOption[]>([])
   const [loadingClients, setLoadingClients] = useState(true)
+  const [history, setHistory] = useState<SentNotification[]>([])
+  const [loadingHistory, setLoadingHistory] = useState(true)
 
   useEffect(() => {
-    async function loadClients() {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('clients')
-        .select('id, name')
-        .order('created_at', { ascending: false })
-      setClients(data || [])
-      setLoadingClients(false)
-    }
-    loadClients()
-  }, [])
+    // Load clients via API
+    fetch('/api/admin/clients')
+      .then(r => r.json())
+      .then(data => { setClients(data.clients || []); setLoadingClients(false) })
+      .catch(() => setLoadingClients(false))
 
-  const sentHistory = [
-    { client: '张伟', title: '水电隐蔽验收待确认', time: '2小时前' },
-    { client: '张伟', title: '新增3张施工照片', time: '昨天' },
-    { client: '李婷', title: '概念方案已完成', time: '3天前' },
-  ]
+    // Load sent notifications via API
+    fetch('/api/admin/notifications')
+      .then(r => r.json())
+      .then(data => { setHistory(data.notifications || []); setLoadingHistory(false) })
+      .catch(() => setLoadingHistory(false))
+  }, [])
 
   async function handleSend(e: React.FormEvent) {
     e.preventDefault()
     if (!form.client || !form.title) { toast.error('请选择客户并填写标题'); return }
     setLoading(true)
 
-    const clientName = clients.find(c => c.id === form.client)?.name || form.client
+    try {
+      const res = await fetch('/api/notifications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientId: form.client, title: form.title, body: form.body }),
+      })
+      const result = await res.json()
 
-    // TODO: Insert into notifications table
-    await new Promise(r => setTimeout(r, 800))
-    toast.success(`已推送给 ${clientName}`)
-    setForm({ client: '', title: '', body: '' })
+      if (res.ok) {
+        const clientName = clients.find(c => c.id === form.client)?.name || ''
+        toast.success(`已推送给 ${clientName}`)
+        // Add to history
+        setHistory(prev => [{
+          id: result.id,
+          title: form.title,
+          body: form.body || null,
+          created_at: new Date().toISOString(),
+          client_name: clientName,
+        }, ...prev])
+        setForm({ client: '', title: '', body: '' })
+      } else {
+        toast.error(result.error || '发送失败')
+      }
+    } catch {
+      toast.error('网络错误')
+    }
     setLoading(false)
   }
 
@@ -96,24 +121,33 @@ export default function AdminNotificationsPage() {
 
       {/* History */}
       <h2 className="text-xs text-brand-text-muted tracking-wider mb-3">发送记录</h2>
-      <div className="space-y-2">
-        {sentHistory.map((h, i) => (
-          <Card key={i} padding="sm">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-brand-bg flex items-center justify-center shrink-0">
-                <User size={14} className="text-brand-accent" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium">{h.client}</span>
-                  <span className="text-[10px] text-brand-text-muted">{h.time}</span>
+      {loadingHistory ? (
+        <div className="flex justify-center py-10"><Loader2 size={20} className="animate-spin text-brand-accent" /></div>
+      ) : history.length === 0 ? (
+        <div className="text-center py-10">
+          <Bell size={24} className="text-brand-border mx-auto mb-2" />
+          <p className="text-xs text-brand-text-muted">暂无发送记录</p>
+        </div>
+      ) : (
+        <div className="space-y-2">
+          {history.map((h) => (
+            <Card key={h.id} padding="sm">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-brand-bg flex items-center justify-center shrink-0">
+                  <User size={14} className="text-brand-accent" />
                 </div>
-                <p className="text-xs text-brand-text-secondary">{h.title}</p>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium">{h.client_name}</span>
+                    <span className="text-[10px] text-brand-text-muted">{formatRelative(h.created_at)}</span>
+                  </div>
+                  <p className="text-xs text-brand-text-secondary">{h.title}</p>
+                </div>
               </div>
-            </div>
-          </Card>
-        ))}
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

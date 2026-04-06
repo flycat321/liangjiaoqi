@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { Bell, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { demoGetUser } from '@/lib/utils/demo-auth'
 import { formatRelative } from '@/lib/utils/format'
 
@@ -18,21 +17,24 @@ interface Notification {
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
+  const user = demoGetUser()
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      // For now show all notifications (proper filtering needs auth)
-      const { data } = await supabase
-        .from('notifications')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(50)
-      setNotifications(data || [])
+      if (!user?.phone) { setLoading(false); return }
+      try {
+        const res = await fetch(`/api/notifications?phone=${encodeURIComponent(user.phone)}`)
+        if (res.ok) {
+          const data = await res.json()
+          setNotifications(data.notifications || [])
+        }
+      } catch {
+        // Network error
+      }
       setLoading(false)
     }
     load()
-  }, [])
+  }, [user?.phone])
 
   return (
     <div className="pb-4">

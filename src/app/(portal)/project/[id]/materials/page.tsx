@@ -7,7 +7,6 @@ import { Card } from '@/components/ui/Card'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { ArrowLeft, Check, Package, Loader2 } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 
 interface ProjectMaterial {
@@ -19,7 +18,6 @@ interface ProjectMaterial {
   unit: string
   unit_price: number
   quantity: number
-  total_price: number
   client_confirmed: boolean
 }
 
@@ -30,27 +28,34 @@ export default function MaterialsPage() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const { data } = await supabase
-        .from('project_materials')
-        .select('*')
-        .eq('project_id', id)
-        .order('sort_order')
-      setMaterials(data || [])
+      try {
+        const res = await fetch(`/api/projects/${id}/materials`)
+        if (res.ok) {
+          const data = await res.json()
+          setMaterials(data.materials || [])
+        }
+      } catch {
+        // Network error
+      }
       setLoading(false)
     }
     load()
   }, [id])
 
   async function handleConfirm(materialId: string) {
-    const supabase = createClient()
-    const { error } = await supabase
-      .from('project_materials')
-      .update({ client_confirmed: true, client_confirmed_at: new Date().toISOString() })
-      .eq('id', materialId)
-    if (error) { toast.error(error.message); return }
-    setMaterials(prev => prev.map(m => m.id === materialId ? { ...m, client_confirmed: true } : m))
-    toast.success('材料已确认')
+    try {
+      const res = await fetch(`/api/projects/${id}/materials`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ materialId }),
+      })
+      if (res.ok) {
+        setMaterials(prev => prev.map(m => m.id === materialId ? { ...m, client_confirmed: true } : m))
+        toast.success('材料已确认')
+      }
+    } catch {
+      toast.error('操作失败')
+    }
   }
 
   const total = materials.reduce((s, m) => s + m.unit_price * m.quantity, 0)
@@ -67,7 +72,7 @@ export default function MaterialsPage() {
           <Link href={`/project/${id}`} className="p-1 -ml-1 touch-manipulation"><ArrowLeft size={20} /></Link>
           <div className="flex-1">
             <h1 className="text-sm font-medium">材料清单</h1>
-            <p className="text-[11px] text-brand-text-muted">{confirmedCount}/{materials.length} 项已确认</p>
+            {materials.length > 0 && <p className="text-[11px] text-brand-text-muted">{confirmedCount}/{materials.length} 项已确认</p>}
           </div>
           {total > 0 && <Badge variant="accent">¥{(total / 10000).toFixed(1)}万</Badge>}
         </div>
