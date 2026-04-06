@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <span className="text-sm font-medium tracking-wide flex-1">量角器 · 管理后台</span>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors touch-manipulation"
+          className="flex items-center gap-1.5 text-xs text-white/70 hover:text-white bg-white/10 rounded-md px-2.5 py-1.5 transition-colors touch-manipulation"
         >
           <LogOut size={14} />
           <span>退出</span>
