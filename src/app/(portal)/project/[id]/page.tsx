@@ -80,8 +80,8 @@ export default function ProjectDetailPage() {
             <Link href={`/project/${id}/materials`} className="flex items-center gap-1.5 text-xs text-brand-text-secondary hover:text-brand-text transition-colors touch-manipulation">
               <Package size={14} className="text-brand-accent" /> 材料清单
             </Link>
-            <Link href={`/project/${id}/quote`} className="flex items-center gap-1.5 text-xs text-brand-text-secondary hover:text-brand-text transition-colors touch-manipulation">
-              <FileText size={14} className="text-brand-accent" /> 报价单
+            <Link href={`/project/${id}/contract`} className="flex items-center gap-1.5 text-xs text-brand-text-secondary hover:text-brand-text transition-colors touch-manipulation">
+              <FileText size={14} className="text-brand-accent" /> 合同费用
             </Link>
             <Link href={`/project/${id}/photos`} className="flex items-center gap-1.5 text-xs text-brand-text-secondary hover:text-brand-text transition-colors touch-manipulation">
               <Camera size={14} className="text-brand-accent" /> 工地照片

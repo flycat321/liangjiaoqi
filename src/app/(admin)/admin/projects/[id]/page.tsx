@@ -59,9 +59,8 @@ export default function AdminProjectDetailPage() {
   const actions = [
     { icon: Ruler, label: '阶段进度管理', desc: '查看/切换阶段状态，勾选检查项', href: `/admin/projects/${id}/stages` },
     { icon: Package, label: '项目材料管理', desc: '选型、定价、确认状态', href: `/admin/projects/${id}/materials` },
-    { icon: FileText, label: '报价单编辑', desc: '编辑分项报价，推送给客户确认', href: `/admin/projects/${id}/quote` },
+    { icon: FileText, label: '合同与费用', desc: '设计费+施工费+专项费用+管理费', href: `/admin/projects/${id}/contract` },
     { icon: Camera, label: '施工照片', desc: '上传/管理施工照片', href: `/admin/projects/${id}/photos` },
-    { icon: FileText, label: '合同管理', desc: '上传合同、查看签署状态', href: `/admin/projects/${id}/contract` },
     { icon: Bell, label: '推送通知', desc: '给客户发送消息通知', href: '/admin/notifications' },
   ]
 
