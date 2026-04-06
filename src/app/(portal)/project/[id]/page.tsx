@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/Badge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { ArrowLeft, Check, Circle, ChevronRight, Camera, FileText, Package, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
-import { createClient } from '@/lib/supabase/client'
 
 interface Project {
   id: string
@@ -33,13 +32,16 @@ export default function ProjectDetailPage() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-      const [{ data: proj }, { data: stgs }] = await Promise.all([
-        supabase.from('projects').select('id, name, address, current_stage_order').eq('id', id).single(),
-        supabase.from('project_stages').select('*').eq('project_id', id).order('stage_order'),
-      ])
-      setProject(proj)
-      setStages(stgs || [])
+      try {
+        const res = await fetch(`/api/projects/${id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setProject(data.project)
+          setStages(data.stages || [])
+        }
+      } catch {
+        // Network error
+      }
       setLoading(false)
     }
     load()

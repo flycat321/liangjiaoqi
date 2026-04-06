@@ -6,7 +6,6 @@ import { Badge } from '@/components/ui/Badge'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { ChevronRight, Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { demoGetUser } from '@/lib/utils/demo-auth'
 import { STAGE_DEFINITIONS } from '@/lib/constants/stages'
 
@@ -25,39 +24,18 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function load() {
-      const supabase = createClient()
-
-      // Get client record by phone
       const phone = user?.phone
       if (!phone) { setLoading(false); return }
 
-      const { data: clientData } = await supabase
-        .from('clients')
-        .select('id')
-        .eq('phone', phone)
-        .single()
-
-      if (!clientData) {
-        // Admin user — show all projects
-        if (user?.role === 'admin') {
-          const { data } = await supabase
-            .from('projects')
-            .select('id, name, address, current_stage_order, status')
-            .order('created_at', { ascending: false })
-          setProjects(data || [])
+      try {
+        const res = await fetch(`/api/projects?phone=${encodeURIComponent(phone)}&role=${user?.role || 'client'}`)
+        if (res.ok) {
+          const data = await res.json()
+          setProjects(data.projects || [])
         }
-        setLoading(false)
-        return
+      } catch {
+        // Network error
       }
-
-      // Client user — show only their projects
-      const { data } = await supabase
-        .from('projects')
-        .select('id, name, address, current_stage_order, status')
-        .eq('client_id', clientData.id)
-        .order('created_at', { ascending: false })
-
-      setProjects(data || [])
       setLoading(false)
     }
     load()
