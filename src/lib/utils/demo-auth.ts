@@ -22,6 +22,13 @@ export function demoLogin(phone: string, password: string): DemoUser | null {
   return account.user
 }
 
+/** Save authenticated user info to localStorage (for Supabase-authed users) */
+export function demoSetUser(user: DemoUser): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(user))
+  }
+}
+
 export function demoGetUser(): DemoUser | null {
   if (typeof window === 'undefined') return null
   const data = localStorage.getItem(STORAGE_KEY)

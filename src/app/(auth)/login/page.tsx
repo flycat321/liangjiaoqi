@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { toast } from 'sonner'
 import { Lock, Phone, Info } from 'lucide-react'
-import { demoLogin } from '@/lib/utils/demo-auth'
+import { demoLogin, demoSetUser } from '@/lib/utils/demo-auth'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -31,9 +31,9 @@ export default function LoginPage() {
       const { data } = await supabase.auth.signInWithPassword({ email, password })
 
       if (data?.user) {
-        const role = data.user.user_metadata?.role || 'client'
+        const role = (data.user.user_metadata?.role || 'client') as 'admin' | 'client'
         const name = data.user.user_metadata?.name || ''
-        demoLogin(phone, password)
+        demoSetUser({ name, phone, role })
         toast.success(`欢迎回来，${name}`)
         router.push(role === 'admin' ? '/admin' : '/dashboard')
         return
