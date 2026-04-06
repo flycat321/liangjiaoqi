@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { toast } from 'sonner'
 import { Lock, Phone, Info } from 'lucide-react'
-import { demoLogin, demoSetUser } from '@/lib/utils/demo-auth'
+import { demoLogin, demoSetUser, demoLogout } from '@/lib/utils/demo-auth'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
@@ -24,13 +24,16 @@ export default function LoginPage() {
     }
     setLoading(true)
 
+    // Clear any previous session data before login attempt
+    demoLogout()
+
     try {
       // Try Supabase auth first
       const supabase = createClient()
       const email = `${phone}@protractor.local`
-      const { data } = await supabase.auth.signInWithPassword({ email, password })
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
-      if (data?.user) {
+      if (data?.user && !error) {
         const role = (data.user.user_metadata?.role || 'client') as 'admin' | 'client'
         const name = data.user.user_metadata?.name || ''
         demoSetUser({ name, phone, role })

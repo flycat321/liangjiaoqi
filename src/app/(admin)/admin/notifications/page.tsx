@@ -2,13 +2,34 @@
 
 import { Card } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
-import { Send, User } from 'lucide-react'
-import { useState } from 'react'
+import { Send, User, Loader2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
+import { createClient } from '@/lib/supabase/client'
+
+interface ClientOption {
+  id: string
+  name: string
+}
 
 export default function AdminNotificationsPage() {
   const [form, setForm] = useState({ client: '', title: '', body: '' })
   const [loading, setLoading] = useState(false)
+  const [clients, setClients] = useState<ClientOption[]>([])
+  const [loadingClients, setLoadingClients] = useState(true)
+
+  useEffect(() => {
+    async function loadClients() {
+      const supabase = createClient()
+      const { data } = await supabase
+        .from('clients')
+        .select('id, name')
+        .order('created_at', { ascending: false })
+      setClients(data || [])
+      setLoadingClients(false)
+    }
+    loadClients()
+  }, [])
 
   const sentHistory = [
     { client: '张伟', title: '水电隐蔽验收待确认', time: '2小时前' },
@@ -20,8 +41,12 @@ export default function AdminNotificationsPage() {
     e.preventDefault()
     if (!form.client || !form.title) { toast.error('请选择客户并填写标题'); return }
     setLoading(true)
+
+    const clientName = clients.find(c => c.id === form.client)?.name || form.client
+
+    // TODO: Insert into notifications table
     await new Promise(r => setTimeout(r, 800))
-    toast.success(`已推送给 ${form.client}`)
+    toast.success(`已推送给 ${clientName}`)
     setForm({ client: '', title: '', body: '' })
     setLoading(false)
   }
@@ -40,9 +65,15 @@ export default function AdminNotificationsPage() {
             className="w-full h-10 px-3 rounded-lg border border-brand-border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-brand-accent/30 transition-colors appearance-none"
           >
             <option value="">选择客户</option>
-            <option>张伟</option>
-            <option>李婷</option>
-            <option>王磊</option>
+            {loadingClients ? (
+              <option disabled>加载中...</option>
+            ) : clients.length === 0 ? (
+              <option disabled>暂无客户</option>
+            ) : (
+              clients.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))
+            )}
           </select>
           <input
             value={form.title}
