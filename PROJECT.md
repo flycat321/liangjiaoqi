@@ -13,15 +13,19 @@
 
 ## 线上地址
 
+**正式域名：** https://guogaoliang.cn
+
 | 页面 | 地址 |
 |------|------|
-| 品牌首页 | https://protractor-app-xi.vercel.app |
-| 服务流程 | https://protractor-app-xi.vercel.app/services |
-| 关于我们 | https://protractor-app-xi.vercel.app/about |
-| 预约咨询 | https://protractor-app-xi.vercel.app/contact |
-| **客户登录** | https://protractor-app-xi.vercel.app/login |
-| **客户仪表盘** | https://protractor-app-xi.vercel.app/dashboard |
-| **管理后台** | https://protractor-app-xi.vercel.app/admin |
+| 品牌首页 | https://guogaoliang.cn |
+| 服务流程 | https://guogaoliang.cn/services |
+| 关于我们 | https://guogaoliang.cn/about |
+| 预约咨询 | https://guogaoliang.cn/contact |
+| **客户登录** | https://guogaoliang.cn/login |
+| **客户仪表盘** | https://guogaoliang.cn/dashboard |
+| **管理后台** | https://guogaoliang.cn/admin |
+
+> Vercel 备用地址：https://protractor-app-xi.vercel.app
 
 ## 本地开发地址
 
