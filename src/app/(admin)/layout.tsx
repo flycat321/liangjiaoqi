@@ -1,9 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LayoutDashboard, FolderKanban, Users, Package, FileText, Bell, ChevronLeft } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { LayoutDashboard, FolderKanban, Users, Package, FileText, Bell, ChevronLeft, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { demoLogout } from '@/lib/utils/demo-auth'
 
 const adminNav = [
   { icon: LayoutDashboard, label: '概览', href: '/admin' },
@@ -16,6 +17,12 @@ const adminNav = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
+  const router = useRouter()
+
+  function handleLogout() {
+    demoLogout()
+    router.push('/login')
+  }
 
   return (
     <div className="min-h-dvh pb-16">
@@ -27,7 +34,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="flex h-7 w-7 items-center justify-center rounded bg-brand-accent">
           <span className="text-xs font-bold text-white font-serif">角</span>
         </div>
-        <span className="text-sm font-medium tracking-wide">量角器 · 管理后台</span>
+        <span className="text-sm font-medium tracking-wide flex-1">量角器 · 管理后台</span>
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors touch-manipulation"
+        >
+          <LogOut size={14} />
+          <span>退出</span>
+        </button>
       </header>
 
       {children}
