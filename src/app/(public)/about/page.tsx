@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 }
 
 const advantages = [
-  { icon: Award, title: '建筑师操盘', desc: '不是家装设计师，是驾驭过医院、博物馆的一级注册建筑师。空间把控降维打击。' },
+  { icon: Award, title: '建筑师+室内设计师联合操盘', desc: '建筑师把控空间和功能，室内设计师深化细节和材质，强强联合。' },
   { icon: Lightbulb, title: '设计即施工图', desc: '不只画效果图，每个收口、每根管线都出施工大样，工人照图施工。' },
   { icon: Shield, title: '标准化不是标准', desc: '50+ 工艺卡确保底线一致，但每套方案都是为你量身定制。' },
   { icon: BookOpen, title: '全程透明', desc: '材料品牌锁定不替换、价格公开可比价、每个节点拍照存档可追溯。' },
