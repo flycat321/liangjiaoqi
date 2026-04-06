@@ -1,9 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, Loader2 } from 'lucide-react'
+import { Bell, Loader2, CheckCheck } from 'lucide-react'
 import { demoGetUser } from '@/lib/utils/demo-auth'
 import { formatRelative } from '@/lib/utils/format'
+import { Button } from '@/components/ui/Button'
+import { cn } from '@/lib/utils/cn'
 
 interface Notification {
   id: string
@@ -36,10 +38,49 @@ export default function NotificationsPage() {
     load()
   }, [user?.phone])
 
+  async function markAsRead(id: string) {
+    const n = notifications.find(n => n.id === id)
+    if (!n || n.is_read) return
+
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n))
+    try {
+      await fetch('/api/notifications/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: [id] }),
+      })
+    } catch {
+      // ignore
+    }
+  }
+
+  async function markAllRead() {
+    const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id)
+    if (unreadIds.length === 0) return
+
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
+    try {
+      await fetch('/api/notifications/read', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: unreadIds }),
+      })
+    } catch {
+      // ignore
+    }
+  }
+
+  const unreadCount = notifications.filter(n => !n.is_read).length
+
   return (
     <div className="pb-4">
-      <div className="px-4 pt-6 mb-4">
+      <div className="px-4 pt-6 mb-4 flex items-center justify-between">
         <h1 className="text-xl font-serif font-bold">消息通知</h1>
+        {unreadCount > 0 && (
+          <Button size="sm" variant="outline" onClick={markAllRead}>
+            <CheckCheck size={14} className="mr-1" /> 全部已读
+          </Button>
+        )}
       </div>
 
       {loading ? (
@@ -53,17 +94,26 @@ export default function NotificationsPage() {
       ) : (
         <div className="divide-y divide-brand-border/30">
           {notifications.map((n) => (
-            <a key={n.id} href={n.link || '#'}
-              className="flex gap-3 px-4 py-3.5 transition-colors active:bg-brand-bg touch-manipulation">
-              <div className="w-9 h-9 rounded-full bg-brand-accent/10 flex items-center justify-center shrink-0">
+            <button
+              key={n.id}
+              onClick={() => markAsRead(n.id)}
+              className={cn(
+                'w-full flex gap-3 px-4 py-3.5 text-left transition-colors active:bg-brand-bg touch-manipulation',
+                !n.is_read && 'bg-brand-accent/[0.03]'
+              )}
+            >
+              <div className="relative w-9 h-9 rounded-full bg-brand-accent/10 flex items-center justify-center shrink-0">
                 <Bell size={16} className="text-brand-accent" />
+                {!n.is_read && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white" />
+                )}
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium">{n.title}</h3>
-                {n.body && <p className="text-[11px] text-brand-text-muted mt-0.5 truncate">{n.body}</p>}
+                <h3 className={cn('text-sm', n.is_read ? 'text-brand-text-secondary' : 'font-medium')}>{n.title}</h3>
+                {n.body && <p className="text-[11px] text-brand-text-muted mt-0.5">{n.body}</p>}
                 <p className="text-[10px] text-brand-text-muted mt-1">{formatRelative(n.created_at)}</p>
               </div>
-            </a>
+            </button>
           ))}
         </div>
       )}
