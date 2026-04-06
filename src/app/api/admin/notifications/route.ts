@@ -7,27 +7,32 @@ export async function GET() {
 
   const { data, error } = await supabase
     .from('notifications')
-    .select('id, title, body, created_at, client_id')
+    .select('id, title, body, created_at, recipient_id')
     .order('created_at', { ascending: false })
     .limit(50)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Enrich with client names
-  const clientIds = [...new Set((data || []).map(n => n.client_id).filter(Boolean))]
-  const { data: clients } = await supabase
-    .from('clients')
-    .select('id, name')
-    .in('id', clientIds.length > 0 ? clientIds : ['_none_'])
+  // Get profile → client name mapping
+  const recipientIds = [...new Set((data || []).map(n => n.recipient_id).filter(Boolean))]
+  let clientMap = new Map<string, string>()
 
-  const clientMap = new Map((clients || []).map(c => [c.id, c.name]))
+  if (recipientIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('id', recipientIds)
+    if (profiles) {
+      clientMap = new Map(profiles.map(p => [p.id, p.full_name]))
+    }
+  }
 
   const notifications = (data || []).map(n => ({
     id: n.id,
     title: n.title,
     body: n.body,
     created_at: n.created_at,
-    client_name: clientMap.get(n.client_id) || '未知客户',
+    client_name: clientMap.get(n.recipient_id) || '未知客户',
   }))
 
   return NextResponse.json({ notifications })
