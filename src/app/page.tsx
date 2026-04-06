@@ -14,6 +14,7 @@ import { WhyProtractor } from '@/components/brand/WhyProtractor'
 import { QualityPromise } from '@/components/brand/QualityPromise'
 import { IdealClient } from '@/components/brand/IdealClient'
 import { ContactCTA } from '@/components/brand/ContactCTA'
+import { Footer } from '@/components/layout/Footer'
 
 export default function HomePage() {
   return (
@@ -36,6 +37,7 @@ export default function HomePage() {
         <IdealClient />
         <ContactCTA />
       </main>
+      <Footer />
     </>
   )
 }

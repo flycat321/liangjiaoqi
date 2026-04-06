@@ -3,6 +3,7 @@ import { PublicHeader } from '@/components/layout/PublicHeader'
 import { ServiceTimeline } from '@/components/brand/ServiceTimeline'
 import { PricingTable } from '@/components/brand/PricingTable'
 import { ContactCTA } from '@/components/brand/ContactCTA'
+import { Footer } from '@/components/layout/Footer'
 
 export const metadata: Metadata = {
   title: '服务流程',
@@ -91,6 +92,7 @@ export default function ServicesPage() {
         <PricingTable />
         <ContactCTA />
       </main>
+      <Footer />
     </>
   )
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { PublicHeader } from '@/components/layout/PublicHeader'
 import { Button } from '@/components/ui/Button'
 import { Phone, Mail, MapPin, Send } from 'lucide-react'
+import { Footer } from '@/components/layout/Footer'
 import { BRAND } from '@/lib/constants/brand'
 import { toast } from 'sonner'
 
@@ -128,6 +129,7 @@ export default function ContactPage() {
           </div>
         </section>
       </main>
+      <Footer />
     </>
   )
 }

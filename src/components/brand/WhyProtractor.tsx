@@ -1,4 +1,5 @@
 import { Award, Lightbulb, Shield, BookOpen } from 'lucide-react'
+import { AnimateInView } from '@/components/ui/AnimateInView'
 
 const reasons = [
   { icon: Award, num: '01', title: '建筑师操盘', desc: '不是家装设计师，是驾驭过医院、博物馆的一级注册建筑师。空间把控降维打击。' },
@@ -11,19 +12,23 @@ export function WhyProtractor() {
   return (
     <section className="px-6 py-16 bg-brand-text">
       <div className="max-w-lg mx-auto">
-        <p className="text-xs tracking-[0.3em] text-brand-accent-light uppercase mb-3">Why Protractor</p>
-        <h2 className="text-2xl font-serif font-bold text-white tracking-wide mb-8">为什么选择量角器</h2>
+        <AnimateInView>
+          <p className="text-xs tracking-[0.3em] text-brand-accent-light uppercase mb-3">Why Protractor</p>
+          <h2 className="text-2xl font-serif font-bold text-white tracking-wide mb-8">为什么选择量角器</h2>
+        </AnimateInView>
         <div className="space-y-4">
           {reasons.map((r, i) => (
-            <div key={r.title} className="flex gap-4 p-4 rounded-xl border border-white/10 animate-[fadeInUp_0.5s_ease_both]" style={{ animationDelay: `${i * 0.1}s` }}>
-              <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-                <r.icon size={18} className="text-brand-accent" />
+            <AnimateInView key={r.title} delay={i * 120}>
+              <div className="flex gap-4 p-4 rounded-xl border border-white/10">
+                <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
+                  <r.icon size={18} className="text-brand-accent" />
+                </div>
+                <div>
+                  <h3 className="text-white font-medium mb-1">{r.title}</h3>
+                  <p className="text-sm text-white/50 leading-relaxed">{r.desc}</p>
+                </div>
               </div>
-              <div>
-                <h3 className="text-white font-medium mb-1">{r.title}</h3>
-                <p className="text-sm text-white/50 leading-relaxed">{r.desc}</p>
-              </div>
-            </div>
+            </AnimateInView>
           ))}
         </div>
       </div>

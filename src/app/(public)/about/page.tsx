@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { PublicHeader } from '@/components/layout/PublicHeader'
 import { FounderProfile } from '@/components/brand/FounderProfile'
 import { ContactCTA } from '@/components/brand/ContactCTA'
+import { Footer } from '@/components/layout/Footer'
 import { BRAND } from '@/lib/constants/brand'
 import { Award, BookOpen, Lightbulb, Shield } from 'lucide-react'
 
@@ -82,6 +83,7 @@ export default function AboutPage() {
 
         <ContactCTA />
       </main>
+      <Footer />
     </>
   )
 }
