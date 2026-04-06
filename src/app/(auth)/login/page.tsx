@@ -8,7 +8,6 @@ import { Card } from '@/components/ui/Card'
 import { toast } from 'sonner'
 import { Lock, Phone, Info } from 'lucide-react'
 import { demoLogin, demoSetUser, demoLogout } from '@/lib/utils/demo-auth'
-import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -28,24 +27,34 @@ export default function LoginPage() {
     demoLogout()
 
     try {
-      // Try Supabase auth first
-      const supabase = createClient()
-      const email = `${phone}@protractor.local`
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      // Server-side auth via our own API (avoids browser → Supabase connectivity issues)
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, password }),
+      })
+      const result = await res.json()
 
-      if (data?.user && !error) {
-        const role = (data.user.user_metadata?.role || 'client') as 'admin' | 'client'
-        const name = data.user.user_metadata?.name || ''
+      if (res.ok && result.user) {
+        const { name, role } = result.user as { name: string; role: 'admin' | 'client' }
         demoSetUser({ name, phone, role })
         toast.success(`欢迎回来，${name}`)
         router.push(role === 'admin' ? '/admin' : '/dashboard')
+        setLoading(false)
         return
       }
+
+      // API returned error — try demo fallback
+      if (res.status !== 401) {
+        // Server error, try demo mode silently
+      } else {
+        // 401 = wrong credentials, still try demo as last resort
+      }
     } catch {
-      // Supabase failed, fall through to demo mode
+      // Network error, fall through to demo mode
     }
 
-    // Fallback to demo mode
+    // Fallback to demo mode (hardcoded accounts for offline/demo use)
     const demoUser = demoLogin(phone, password)
     if (demoUser) {
       toast.success(`欢迎回来，${demoUser.name}`)
